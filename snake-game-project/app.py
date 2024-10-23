@@ -154,3 +154,35 @@ def start_game():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+import json
+
+# 读取排行榜数据
+def load_leaderboard():
+    try:
+        with open('leaderboard.json', 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+
+# 保存排行榜数据
+def save_leaderboard(leaderboard):
+    with open('leaderboard.json', 'w') as file:
+        json.dump(leaderboard, file)
+
+@app.route('/leaderboard', methods=['GET'])
+def leaderboard():
+    leaderboard = load_leaderboard()
+    return jsonify(leaderboard)
+
+@app.route('/submit_score', methods=['POST'])
+def submit_score():
+    data = request.json
+    score = data.get('score')
+    leaderboard = load_leaderboard()
+    leaderboard.append(score)
+    leaderboard.sort(reverse=True)
+    save_leaderboard(leaderboard)
+    return jsonify({'status': 'Score submitted'})
